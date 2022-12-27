@@ -560,6 +560,7 @@ function init_sys() -> unit = {
   misa->M()   = 0b1;                            /* integer multiply/divide */
   misa->U()   = 0b1;                            /* user-mode */
   misa->S()   = 0b1;                            /* supervisor-mode */
+  misa->V()   = bool_to_bits(sys_enable_rvv()); /* RVV */
 
   if   sys_enable_fdext() & sys_enable_zfinx()
   then internal_error(__FILE__, __LINE__, "F and Zfinx cannot both be enabled!");
@@ -597,6 +598,21 @@ function init_sys() -> unit = {
 
   minstret           = zero_extend(0b0);
   minstret_increment = true;
+
+  /* initialize vector csrs */
+  vstart             = EXTZ(0b0);
+  vxsat              = 0b0;
+  vxrm               = 0b00;
+  vcsr->vxrm()       = vxrm;
+  vcsr->vxsat()      = vxsat;
+  vl                 = EXTZ(0b10000); /* the default value is 16 */
+  vtype->vill()      = 0b0;
+  vtype->reserved()  = EXTZ(0b0);
+  vtype->vma()       = 0b0;
+  vtype->vta()       = 0b0;
+  vtype->vsew()      = 0b000;
+  vtype->vlmul()     = 0b000;
+  vlenb              = EXTZ(0b0); 
 
   init_pmp();
 

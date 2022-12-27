@@ -231,6 +231,7 @@ char *process_args(int argc, char **argv)
                     "N"
                     "I"
                     "F"
+                    "W"
                     "i"
                     "s"
                     "p"
@@ -284,6 +285,10 @@ char *process_args(int argc, char **argv)
     case 'F':
       fprintf(stderr, "disabling floating point (F and D extensions).\n");
       rv_enable_fdext = false;
+      break;
+    case 'W':
+      fprintf(stderr, "disabling RVV vector instructions.\n");
+      rv_enable_rvv = false;
       break;
     case 'i':
       fprintf(stderr, "enabling storing illegal instruction bits in mtval.\n");
