@@ -38,7 +38,9 @@ bool sys_enable_zfinx(unit u)
 }
 
 bool sys_enable_rvv(unit u)
-{ return rv_enable_rvv; }
+{
+  return rv_enable_rvv;
+}
 
 bool sys_enable_writable_misa(unit u)
 {
