@@ -547,7 +547,7 @@ function clause execute(VIMTYPE(funct6, vs2, simm, vd)) = {
   let 'm = SEW;
 
   let vm_val  : vector('n, dec, bool)     = read_vmask_carry(num_elem, 0b0, 0b00000);
-  let imm_val : bits('m)                  = EXTS(simm);
+  let imm_val : bits('m)                  = sign_extend(simm);
   let vs2_val : vector('n, dec, bits('m)) = read_vreg(num_elem, SEW, LMUL_pow, vs2);
   let vd_val  : vector('n, dec, bool)     = read_vmask(num_elem, 0b0, vd);
   result      : vector('n, dec, bool)     = undefined;
@@ -599,7 +599,7 @@ function clause execute(VIMCTYPE(funct6, vs2, simm, vd)) = {
   let 'n = num_elem;
   let 'm = SEW;
 
-  let imm_val : bits('m)                  = EXTS(simm);
+  let imm_val : bits('m)                  = sign_extend(simm);
   let vs2_val : vector('n, dec, bits('m)) = read_vreg(num_elem, SEW, LMUL_pow, vs2);
   let vd_val  : vector('n, dec, bool)     = read_vmask(num_elem, 0b0, vd);
   result      : vector('n, dec, bool)     = undefined;
@@ -658,7 +658,7 @@ function clause execute(VIMSTYPE(funct6, vs2, simm, vd)) = {
   };
 
   let vm_val  : vector('n, dec, bool)     = read_vmask_carry(num_elem, 0b0, 0b00000);
-  let imm_val : bits('m)                  = EXTS(simm);
+  let imm_val : bits('m)                  = sign_extend(simm);
   let vs2_val : vector('n, dec, bits('m)) = read_vreg(num_elem, SEW, LMUL_pow, vs2);
   let vd_val  : vector('n, dec, bits('m)) = read_vreg(num_elem, SEW, LMUL_pow, vd);
   result      : vector('n, dec, bits('m)) = undefined;
@@ -713,7 +713,7 @@ function clause execute(VICMPTYPE(funct6, vm, vs2, simm, vd)) = {
   let 'm = SEW;
 
   let vm_val  : vector('n, dec, bool)     = read_vmask(num_elem, vm, 0b00000);
-  let imm_val : bits('m)                  = EXTS(simm);
+  let imm_val : bits('m)                  = sign_extend(simm);
   let vs2_val : vector('n, dec, bits('m)) = read_vreg(num_elem, SEW, LMUL_pow, vs2);
   let vd_val  : vector('n, dec, bool)     = read_vmask(num_elem, 0b0, vd);
   result      : vector('n, dec, bool)     = undefined;

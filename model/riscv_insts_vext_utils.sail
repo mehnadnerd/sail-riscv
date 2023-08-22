@@ -249,7 +249,7 @@ function get_scalar(rs1, SEW) = {
     X(rs1)[SEW - 1 .. 0]
   } else {
     /* Sign extend to SEW */
-    EXTS(SEW, X(rs1))
+    sign_extend(SEW, X(rs1))
   }
 }
 
@@ -462,7 +462,7 @@ function read_vreg_seg(num_elem, SEW, LMUL_pow, nf, vrid) = {
   foreach (i from 0 to (num_elem - 1)) {
     result[i] = zeros('q * 'm);
     foreach (j from 0 to (nf - 1)) {
-      result[i] = result[i] | (EXTZ(vreg_list[j][i]) << (j * 'm))
+      result[i] = result[i] | (zero_extend(vreg_list[j][i]) << (j * 'm))
     }
   };
   result
@@ -878,7 +878,7 @@ function fp_class(xf) = {
     else if f_is_QNaN        (xf) then 0b_10_0000_0000
     else zeros();
 
-  EXTZ(result_val_10b)
+  zero_extend(result_val_10b)
 }
 
 val fp_widen : forall 'm, 'm in {16, 32}. bits('m) -> bits('m * 2) effect {escape, rreg, undef, wreg}
@@ -951,9 +951,9 @@ function count_leadingzeros (sig, len) = {
 val rsqrt7 : forall 'm, 'm in {16, 32, 64}. (bits('m), bool) -> bits_D
 function rsqrt7 (v, sub) = {
   let (sig, exp, sign, e, s) : (bits(64), bits(64), bits(1), nat, nat) = match 'm {
-    16 => (EXTZ(64, v[9 .. 0]), EXTZ(64, v[14 .. 10]), [v[15]], 5, 10),
-    32 => (EXTZ(64, v[22 .. 0]), EXTZ(64, v[30 .. 23]), [v[31]], 8, 23),
-    64 => (EXTZ(64, v[51 .. 0]), EXTZ(64, v[62 .. 52]), [v[63]], 11, 52)
+    16 => (zero_extend(64, v[9 .. 0]), zero_extend(64, v[14 .. 10]), [v[15]], 5, 10),
+    32 => (zero_extend(64, v[22 .. 0]), zero_extend(64, v[30 .. 23]), [v[31]], 8, 23),
+    64 => (zero_extend(64, v[51 .. 0]), zero_extend(64, v[62 .. 52]), [v[63]], 11, 52)
   };
   assert(s == 10 & e == 5 | s == 23 & e == 8 | s == 52 & e == 11);
   let table : vector(128, dec, int) = [
@@ -978,7 +978,7 @@ function rsqrt7 (v, sub) = {
       if sub then {
         let nr_leadingzeros = count_leadingzeros(sig, s);
         assert(nr_leadingzeros >= 0);
-        (to_bits(64, (0 - nr_leadingzeros)), EXTZ(64, sig[(s - 1) .. 0] << (1 + nr_leadingzeros)))
+        (to_bits(64, (0 - nr_leadingzeros)), zero_extend(64, sig[(s - 1) .. 0] << (1 + nr_leadingzeros)))
       } else {
         (exp, sig)
       };
@@ -991,7 +991,7 @@ function rsqrt7 (v, sub) = {
   assert(idx >= 0 & idx < 128);
   let out_sig = to_bits(s, table[(127 - idx)]) << (s - 7);
   let out_exp = to_bits(e, (3 * (2^(e - 1) - 1) - 1 - signed(normalized_exp)) / 2);
-  EXTZ(64, sign @ out_exp @ out_sig)
+  zero_extend(64, sign @ out_exp @ out_sig)
 }
 
 val riscv_f16Rsqrte7 : (bits_rm, bits_H) -> (bits_fflags, bits_H) effect {rreg}
@@ -1051,9 +1051,9 @@ function riscv_f64Rsqrte7 (rm, v) = {
 val recip7 : forall 'm, 'm in {16, 32, 64}. (bits('m), bits(3), bool) -> (bool, bits_D)
 function recip7 (v, rm_3b, sub) = {
   let (sig, exp, sign, e, s) : (bits(64), bits(64), bits(1), nat, nat) = match 'm {
-    16 => (EXTZ(64, v[9 .. 0]), EXTZ(64, v[14 .. 10]), [v[15]], 5, 10),
-    32 => (EXTZ(64, v[22 .. 0]), EXTZ(64, v[30 .. 23]), [v[31]], 8, 23),
-    64 => (EXTZ(64, v[51 .. 0]), EXTZ(64, v[62 .. 52]), [v[63]], 11, 52)
+    16 => (zero_extend(64, v[9 .. 0]), zero_extend(64, v[14 .. 10]), [v[15]], 5, 10),
+    32 => (zero_extend(64, v[22 .. 0]), zero_extend(64, v[30 .. 23]), [v[31]], 8, 23),
+    64 => (zero_extend(64, v[51 .. 0]), zero_extend(64, v[62 .. 52]), [v[63]], 11, 52)
   };
   assert(s == 10 & e == 5 | s == 23 & e == 8 | s == 52 & e == 11);
   let table : vector(128, dec, int) = [
@@ -1078,7 +1078,7 @@ function recip7 (v, rm_3b, sub) = {
   assert(nr_leadingzeros >= 0);
   let (normalized_exp, normalized_sig) =
       if sub then {
-        (to_bits(64, (0 - nr_leadingzeros)), EXTZ(64, sig[(s - 1) .. 0] << (1 + nr_leadingzeros)))
+        (to_bits(64, (0 - nr_leadingzeros)), zero_extend(64, sig[(s - 1) .. 0] << (1 + nr_leadingzeros)))
       } else {
         (exp, sig)
       };
@@ -1101,10 +1101,10 @@ function recip7 (v, rm_3b, sub) = {
 
   if sub & nr_leadingzeros > 1 then {
       if (rm_3b == 0b001 | rm_3b == 0b010 & sign == 0b0 | rm_3b == 0b011 & sign == 0b1) then {
-        (true, EXTZ(64, sign @ ones(e - 1) @ 0b0 @ ones(s)))
+        (true, zero_extend(64, sign @ ones(e - 1) @ 0b0 @ ones(s)))
       }
-      else (true, EXTZ(64, sign @ ones(e) @ zeros(s)))
-    } else (false, EXTZ(64, sign @ out_exp @ out_sig))
+      else (true, zero_extend(64, sign @ ones(e) @ zeros(s)))
+    } else (false, zero_extend(64, sign @ out_exp @ out_sig))
 }
 
 val riscv_f16Recip7 : (bits_rm, bits_H) -> (bits_fflags, bits_H) effect {rreg}

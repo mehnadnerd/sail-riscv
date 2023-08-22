@@ -105,7 +105,7 @@ function clause execute VSET_TYPE(op, ma, ta, sew, lmul, rs1, rd) = {
   let SEW_pow_new  = get_sew_pow();
   if SEW_pow_new > LMUL_pow_new + ELEN_pow then {
     vtype->bits() = 0b1 @ zeros(sizeof(xlen) - 1); /* set vtype.vill */
-    vl = EXTZ(0b0);
+    vl = zeros();
     print_reg("CSR vtype <- " ^ BitStr(vtype.bits()));
     print_reg("CSR vl <- " ^ BitStr(vl));
     return RETIRE_SUCCESS
@@ -129,7 +129,7 @@ function clause execute VSET_TYPE(op, ma, ta, sew, lmul, rs1, rd) = {
     let ratio_pow_new = SEW_pow_new - LMUL_pow_new;
     if (ratio_pow_new != ratio_pow_ori) then {
       vtype->bits() = 0b1 @ zeros(sizeof(xlen) - 1); /* set vtype.vill */
-      vl = EXTZ(0b0);
+      vl = zeros();
     }
   };
   print_reg("CSR vtype <- " ^ BitStr(vtype.bits()));
@@ -171,7 +171,7 @@ function clause execute VSETI_TYPE(ma, ta, sew, lmul, uimm, rd) = {
   let SEW_pow_new  = get_sew_pow();
   if SEW_pow_new > LMUL_pow_new + ELEN_pow then {
     vtype->bits() = 0b1 @ zeros(sizeof(xlen) - 1); /* set vtype.vill */
-    vl = EXTZ(0b0);
+    vl = zeros();
     print_reg("CSR vtype <- " ^ BitStr(vtype.bits()));
     print_reg("CSR vl <- " ^ BitStr(vl));
     return RETIRE_SUCCESS

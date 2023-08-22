@@ -600,19 +600,19 @@ function init_sys() -> unit = {
   minstret_increment = true;
 
   /* initialize vector csrs */
-  vstart             = EXTZ(0b0);
+  vstart             = zero_extend(0b0);
   vxsat              = 0b0;
   vxrm               = 0b00;
   vcsr->vxrm()       = vxrm;
   vcsr->vxsat()      = vxsat;
-  vl                 = EXTZ(0b0);
+  vl                 = zero_extend(0b0);
   vtype->vill()      = 0b1;
-  vtype->reserved()  = EXTZ(0b0);
+  vtype->reserved()  = zero_extend(0b0);
   vtype->vma()       = 0b0;
   vtype->vta()       = 0b0;
   vtype->vsew()      = 0b000;
   vtype->vlmul()     = 0b000;
-  vlenb              = EXTZ(0b0);
+  vlenb              = zero_extend(0b0);
 
   init_pmp();
 

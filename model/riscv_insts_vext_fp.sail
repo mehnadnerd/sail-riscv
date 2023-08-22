@@ -436,7 +436,7 @@ function clause execute(VFUNARY0(vm, vs2, vfunary0, vd)) = {
                             },
         FV_CVT_F_XU      => {
                               let (fflags, elem) : (bits_fflags, bits('m)) = match 'm {
-                                16 => riscv_ui32ToF16(rm_3b, EXTZ(vs2_val[i])),
+                                16 => riscv_ui32ToF16(rm_3b, zero_extend(vs2_val[i])),
                                 32 => riscv_ui32ToF32(rm_3b, vs2_val[i]),
                                 64 => riscv_ui64ToF64(rm_3b, vs2_val[i])
                               };
@@ -445,7 +445,7 @@ function clause execute(VFUNARY0(vm, vs2, vfunary0, vd)) = {
                             },
         FV_CVT_F_X       => {
                               let (fflags, elem) : (bits_fflags, bits('m)) = match 'm {
-                                16 => riscv_i32ToF16(rm_3b, EXTS(vs2_val[i])),
+                                16 => riscv_i32ToF16(rm_3b, sign_extend(vs2_val[i])),
                                 32 => riscv_i32ToF32(rm_3b, vs2_val[i]),
                                 64 => riscv_i64ToF64(rm_3b, vs2_val[i])
                               };
@@ -555,8 +555,8 @@ function clause execute(VFWUNARY0(vm, vs2, vfwunary0, vd)) = {
                             },
         FWV_CVT_F_XU     => {
                               let (fflags, elem) : (bits_fflags, bits('o)) = match 'm {
-                                8  => riscv_ui32ToF16(rm_3b, EXTZ(vs2_val[i])),
-                                16 => riscv_ui32ToF32(rm_3b, EXTZ(vs2_val[i])),
+                                8  => riscv_ui32ToF16(rm_3b, zero_extend(vs2_val[i])),
+                                16 => riscv_ui32ToF32(rm_3b, zero_extend(vs2_val[i])),
                                 32 => riscv_ui32ToF64(rm_3b, vs2_val[i])
                               };
                               write_fflags(fflags);
@@ -564,8 +564,8 @@ function clause execute(VFWUNARY0(vm, vs2, vfwunary0, vd)) = {
                             },
         FWV_CVT_F_X      => {
                               let (fflags, elem) : (bits_fflags, bits('o)) = match 'm {
-                                8  => riscv_i32ToF16(rm_3b, EXTS(vs2_val[i])),
-                                16 => riscv_i32ToF32(rm_3b, EXTS(vs2_val[i])),
+                                8  => riscv_i32ToF16(rm_3b, sign_extend(vs2_val[i])),
+                                16 => riscv_i32ToF32(rm_3b, sign_extend(vs2_val[i])),
                                 32 => riscv_i32ToF64(rm_3b, vs2_val[i])
                               };
                               write_fflags(fflags);

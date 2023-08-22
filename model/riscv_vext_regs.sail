@@ -108,7 +108,7 @@ mapping vreg_name = {
 
 val rV : forall 'n, 0 <= 'n < 32. regno('n) -> vregtype effect {rreg, escape}
 function rV r = {
-  let zero_vreg : vregtype = EXTZ(0x0);
+  let zero_vreg : vregtype = zeros();
   let v : vregtype =
     match r {
       0 => vr0,
@@ -203,7 +203,7 @@ overload V = {rV_bits, wV_bits, rV, wV}
 
 val init_vregs : unit -> unit effect {wreg}
 function init_vregs () = {
-  let zero_vreg : vregtype = EXTZ(0x0);
+  let zero_vreg : vregtype = zeros();
   vr0  = zero_vreg;
   vr1  = zero_vreg;
   vr2  = zero_vreg;
@@ -286,7 +286,7 @@ function write_single_vreg(num_elem, SEW, vrid, v) = {
   assert(8 <= SEW & SEW <= 64);
   foreach (i from (num_elem - 1) downto 0) {
     r = r << SEW;
-    r = r | EXTZ(v[i]);
+    r = r | zero_extend(v[i]);
   };
 
   V(vrid) = r
@@ -377,9 +377,9 @@ function write_single_element(EEW, index, vrid, value) = {
   foreach (i from ('elem_per_reg - 1) downto 0) {
     r = r << EEW;
     if i == real_index then {
-      r = r | EXTZ(value);
+      r = r | zero_extend(value);
     } else {
-      r = r | EXTZ(vrid_val[i]);
+      r = r | zero_extend(vrid_val[i]);
     }
   };
   V(real_vrid) = r;

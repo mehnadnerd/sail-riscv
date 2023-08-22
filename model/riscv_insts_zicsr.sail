@@ -136,10 +136,10 @@ function readCSR csr : csreg -> xlenbits = {
     (0xB82, 32) => minstret[63 .. 32],
 
     /* vector */
-    (0x008, _) => EXTZ(vstart),
-    (0x009, _) => EXTZ(vxsat),
-    (0x00A, _) => EXTZ(vxrm),
-    (0x00F, _) => EXTZ(vcsr.bits()),
+    (0x008, _) => zero_extend(vstart),
+    (0x009, _) => zero_extend(vxsat),
+    (0x00A, _) => zero_extend(vxrm),
+    (0x00F, _) => zero_extend(vcsr.bits()),
     (0xC20, _) => vl,
     (0xC21, _) => vtype.bits(),
     (0xC22, _) => vlenb,
@@ -253,10 +253,10 @@ function writeCSR (csr : csreg, value : xlenbits) -> unit = {
     (0x015,  _) => write_seed_csr(),
 
     /* vector */
-    (0x008, _) => { let vstart_length = get_vlen_pow(); vstart = EXTZ(16, value[(vstart_length - 1) .. 0]); Some(EXTZ(vstart)) },
-    (0x009, _) => { vxsat = value[0 .. 0]; Some(EXTZ(vxsat)) },
-    (0x00A, _) => { vxrm = value[1 .. 0]; Some(EXTZ(vxrm)) },
-    (0x00F, _) => { vcsr->bits() = value[2 ..0]; Some(EXTZ(vcsr.bits())) },
+    (0x008, _) => { let vstart_length = get_vlen_pow(); vstart = zero_extend(16, value[(vstart_length - 1) .. 0]); Some(zero_extend(vstart)) },
+    (0x009, _) => { vxsat = value[0 .. 0]; Some(zero_extend(vxsat)) },
+    (0x00A, _) => { vxrm = value[1 .. 0]; Some(zero_extend(vxrm)) },
+    (0x00F, _) => { vcsr->bits() = value[2 ..0]; Some(zero_extend(vcsr.bits())) },
     (0xC20, _) => { vl = value; Some(vl) },
     (0xC21, _) => { vtype->bits() = value; Some(vtype.bits()) },
     (0xC22, _) => { vlenb = value; Some(vlenb) },
