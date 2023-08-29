@@ -104,6 +104,9 @@ function clause execute VSET_TYPE(op, ma, ta, sew, lmul, rs1, rd) = {
   let LMUL_pow_new = get_lmul_pow();
   let SEW_pow_new  = get_sew_pow();
   if SEW_pow_new > LMUL_pow_new + ELEN_pow then {
+    /* Note: Implementations can set vill or trap if the vtype setting is not supported.
+     * TODO: configuration support for both solutions
+     */
     vtype->bits() = 0b1 @ zeros(sizeof(xlen) - 1); /* set vtype.vill */
     vl = zeros();
     print_reg("CSR vtype <- " ^ BitStr(vtype.bits()));
@@ -117,8 +120,11 @@ function clause execute VSET_TYPE(op, ma, ta, sew, lmul, rs1, rd) = {
     let rs1_val = X(rs1);
     let AVL = unsigned(rs1_val);
     vl = if AVL <= VLMAX then to_bits(sizeof(xlen), AVL)
-         else if AVL < 2 * VLMAX then to_bits(sizeof(xlen), (AVL + 1) / 2) /* ceil(AVL / 2) ≤ vl ≤ VLMAX */
+         else if AVL < 2 * VLMAX then to_bits(sizeof(xlen), (AVL + 1) / 2)
          else to_bits(sizeof(xlen), VLMAX);
+    /* Note: ceil(AVL / 2) ≤ vl ≤ VLMAX when VLMAX < AVL < (2 * VLMAX)
+     * TODO: configuration support for either using ceil(AVL / 2) or VLMAX
+     */
     X(rd) = vl;
   } else if (rd != 0b00000) then { /* set vl to VLMAX */
     let AVL = unsigned(ones(sizeof(xlen)));
@@ -128,6 +134,9 @@ function clause execute VSET_TYPE(op, ma, ta, sew, lmul, rs1, rd) = {
     let AVL = unsigned(vl);
     let ratio_pow_new = SEW_pow_new - LMUL_pow_new;
     if (ratio_pow_new != ratio_pow_ori) then {
+      /* Note: Implementations can set vill or trap if the vtype setting is not supported.
+       * TODO: configuration support for both solutions
+       */
       vtype->bits() = 0b1 @ zeros(sizeof(xlen) - 1); /* set vtype.vill */
       vl = zeros();
     }
@@ -170,6 +179,9 @@ function clause execute VSETI_TYPE(ma, ta, sew, lmul, uimm, rd) = {
   let LMUL_pow_new = get_lmul_pow();
   let SEW_pow_new  = get_sew_pow();
   if SEW_pow_new > LMUL_pow_new + ELEN_pow then {
+    /* Note: Implementations can set vill or trap if the vtype setting is not supported.
+     * TODO: configuration support for both solutions
+     */
     vtype->bits() = 0b1 @ zeros(sizeof(xlen) - 1); /* set vtype.vill */
     vl = zeros();
     print_reg("CSR vtype <- " ^ BitStr(vtype.bits()));
@@ -181,8 +193,11 @@ function clause execute VSETI_TYPE(ma, ta, sew, lmul, uimm, rd) = {
 
   /* set vl according to VLMAX and AVL */
   vl = if AVL <= VLMAX then to_bits(sizeof(xlen), AVL)
-       else if AVL < 2 * VLMAX then to_bits(sizeof(xlen), (AVL + 1) / 2) /* ceil(AVL / 2) ≤ vl ≤ VLMAX */
+       else if AVL < 2 * VLMAX then to_bits(sizeof(xlen), (AVL + 1) / 2)
        else to_bits(sizeof(xlen), VLMAX);
+  /* Note: ceil(AVL / 2) ≤ vl ≤ VLMAX when VLMAX < AVL < (2 * VLMAX)
+   * TODO: configuration support for either using ceil(AVL / 2) or VLMAX
+   */
   X(rd) = vl;
   print_reg("CSR vtype <- " ^ BitStr(vtype.bits()));
   print_reg("CSR vl <- " ^ BitStr(vl));

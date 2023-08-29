@@ -44,6 +44,10 @@ function get_elen_pow() = match elen {
     0b0 => 5,
     0b1 => 6
 }
+/* Note: ELEN=32 requires a different encoding of the CSR vtype.
+ * The current version of vtype implementation corresponds to the ELEN=64 configuration.
+ * TODO: the configurarion of ELEN and its corresponding vtype implementations.
+ */
 
 register vlen : bits(4)
 

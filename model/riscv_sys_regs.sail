@@ -211,7 +211,6 @@ function haveZknd()   -> bool = true
 
 function haveZmmul()  -> bool = true
 function haveRVV()    -> bool = misa.V() == 0b1
-/* see below for F and D extension tests */
 
 /* Zicond extension support */
 function haveZicond() -> bool = true

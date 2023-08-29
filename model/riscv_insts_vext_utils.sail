@@ -478,25 +478,6 @@ function canonical_NaN('m) = {
   }
 }
 
-/* Floating point NaN boxing / unboxing that support 16-bit to 64-bit types */
-val nan_box_vector : forall 'm, ('m in {16, 32, 64} & 'm <= flen). bits('m) -> flenbits
-function nan_box_vector(unboxed) = {
-  match 'm {
-    16 => nan_box(unboxed),
-    32 => nan_box(unboxed),
-    64 => unboxed
-  }
-}
-
-val nan_unbox_vector : forall 'm, ('m in {16, 32, 64} & 'm <= flen). (flenbits, int('m)) -> bits('m)
-function nan_unbox_vector(regval, 'm) = {
-  match 'm {
-    16 => nan_unbox(regval),
-    32 => nan_unbox(regval),
-    64 => regval
-  }
-}
-
 /* Floating point classification functions */
 val f_is_neg_inf : forall 'm, 'm in {16, 32, 64}. bits('m) -> bool
 function f_is_neg_inf(xf) = {
@@ -600,12 +581,11 @@ function f_is_NaN(xf) = {
 /* Scalar register shaping for floating point operations */
 val get_scalar_fp : forall 'n, 'n in {16, 32, 64}. (regidx, int('n)) -> bits('n) effect {escape, rreg}
 function get_scalar_fp(rs1, SEW) = {
-  if sizeof(flen) >= SEW then {
-    /* Least significant SEW bits */
-    nan_unbox_vector(F(rs1), SEW)
-  } else {
-    assert(false, "invalid vector floating-point type width: FLEN < SEW");
-    zeros()
+  assert(sizeof(flen) >= SEW, "invalid vector floating-point type width: FLEN < SEW");
+  match SEW {
+    16 => F_H(rs1),
+    32 => F_S(rs1),
+    64 => F_D(rs1)
   }
 }
 
