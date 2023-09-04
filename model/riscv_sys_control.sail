@@ -600,14 +600,11 @@ function init_sys() -> unit = {
   minstret_increment = true;
 
   /* initialize vector csrs */
-  elen               = 0b1; /* ELEN=64 as default value */
-  /* vlen               = ...;
-   *  VLEN needs to be manually speficied currently.
-   *  See riscv_vlen.sail for details.
-   */
-  vlenb              = zero_extend(0b0);
-  /* The value of vlenb is not used currently.
-   * It should be assigned as 2 ^ (get_vlen_pow() - 3) after vlen is speficied.
+  elen               = 0b1; /* ELEN=64 as the common case */
+  vlen               = 0b0100; /* VLEN=512 as a default value */
+  vlenb              = to_bits(sizeof(xlen), 2 ^ (get_vlen_pow() - 3)); /* vlenb holds the constant value VLEN/8 */
+  /* VLEN value needs to be manually changed currently.
+   * See riscv_vlen.sail for details.
    */
   vstart             = zero_extend(0b0);
   vxsat              = 0b0;

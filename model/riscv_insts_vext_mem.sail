@@ -731,7 +731,7 @@ function process_vlre (nf, vd, load_width_bytes, rs1, elem_per_reg) = {
 function clause execute(VLRETYPE(nf, rs1, width, vd)) = {
   let load_width_bytes = vlewidth_bytesnumber(width);
   let EEW = load_width_bytes * 8;
-  let VLEN = int_power(2, get_vlen_pow());
+  let VLEN = unsigned(vlenb) * 8;
   let elem_per_reg : int = VLEN / EEW;
   let nf_int = nfields_int(nf);
 
@@ -831,7 +831,7 @@ function process_vsre (nf, load_width_bytes, rs1, vs3, elem_per_reg) = {
 function clause execute(VSRETYPE(nf, rs1, vs3)) = {
   let load_width_bytes = 1;
   let EEW = 8;
-  let VLEN = int_power(2, get_vlen_pow());
+  let VLEN = unsigned(vlenb) * 8;
   let elem_per_reg : int = VLEN / EEW;
   let nf_int = nfields_int(nf);
 
