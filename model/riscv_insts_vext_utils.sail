@@ -280,7 +280,7 @@ function get_end_element() = unsigned(vl) - 1
  *   vector2 is a "mask" vector that is true for an element if the corresponding element
  *     in the result vector should be updated by the calling instruction
  */
-val init_masked_result : forall 'n 'm 'p. (int('n), int('m), int('p), vector('n, dec, bits('m)), vector('n, dec, bool)) -> (vector('n, dec, bits('m)), vector('n, dec, bool)) effect {escape, rreg, undef}
+val init_masked_result : forall 'n 'm 'p, 'n >= 0. (int('n), int('m), int('p), vector('n, dec, bits('m)), vector('n, dec, bool)) -> (vector('n, dec, bits('m)), vector('n, dec, bool)) effect {escape, rreg, undef}
 function init_masked_result(num_elem, SEW, LMUL_pow, vd_val, vm_val) = {
   let start_element = get_start_element();
   let end_element   = get_end_element();
@@ -333,7 +333,7 @@ function init_masked_result(num_elem, SEW, LMUL_pow, vd_val, vm_val) = {
  * (vs3 for store and vs2 for reduction). There's no destination register to be masked.
  * In these cases, this function can be called to simply get the mask vector for vs (without the prepared vd result vector).
  */
-val init_masked_source : forall 'n 'p. (int('n), int('p), vector('n, dec, bool)) -> vector('n, dec, bool) effect {escape, rreg, undef}
+val init_masked_source : forall 'n 'p, 'n >= 0. (int('n), int('p), vector('n, dec, bool)) -> vector('n, dec, bool) effect {escape, rreg, undef}
 function init_masked_source(num_elem, LMUL_pow, vm_val) = {
   let start_element = get_start_element();
   let end_element   = get_end_element();
@@ -367,7 +367,7 @@ function init_masked_source(num_elem, LMUL_pow, vm_val) = {
 
 /* Mask handling for carry functions that use masks as input/output */
 /* Only prestart and tail elements are masked in a mask value */
-val init_masked_result_carry : forall 'n 'm 'p. (int('n), int('m), int('p), vector('n, dec, bool)) -> (vector('n, dec, bool), vector('n, dec, bool)) effect {escape, rreg, undef}
+val init_masked_result_carry : forall 'n 'm 'p, 'n >= 0. (int('n), int('m), int('p), vector('n, dec, bool)) -> (vector('n, dec, bool), vector('n, dec, bool)) effect {escape, rreg, undef}
 function init_masked_result_carry(num_elem, SEW, LMUL_pow, vd_val) = {
   let start_element = get_start_element();
   let end_element   = get_end_element();
@@ -403,7 +403,7 @@ function init_masked_result_carry(num_elem, SEW, LMUL_pow, vd_val) = {
 }
 
 /* Mask handling for cmp functions that use masks as output */
-val init_masked_result_cmp : forall 'n 'm 'p. (int('n), int('m), int('p), vector('n, dec, bool), vector('n, dec, bool)) -> (vector('n, dec, bool), vector('n, dec, bool)) effect {escape, rreg, undef}
+val init_masked_result_cmp : forall 'n 'm 'p, 'n >= 0. (int('n), int('m), int('p), vector('n, dec, bool), vector('n, dec, bool)) -> (vector('n, dec, bool), vector('n, dec, bool)) effect {escape, rreg, undef}
 function init_masked_result_cmp(num_elem, SEW, LMUL_pow, vd_val, vm_val) = {
   let start_element = get_start_element();
   let end_element   = get_end_element();
@@ -450,7 +450,7 @@ function init_masked_result_cmp(num_elem, SEW, LMUL_pow, vd_val, vm_val) = {
  *   Read multiple register groups and concatenate them in parallel
  *   The whole segments with the same element index are combined together
  */
-val read_vreg_seg : forall 'n 'm 'p 'q. (int('n), int('m), int('p), int('q), regidx) -> vector('n, dec, bits('q * 'm)) effect {escape, rreg, undef}
+val read_vreg_seg : forall 'n 'm 'p 'q, 'n >= 0 & 'q >= 0. (int('n), int('m), int('p), int('q), regidx) -> vector('n, dec, bits('q * 'm)) effect {escape, rreg, undef}
 function read_vreg_seg(num_elem, SEW, LMUL_pow, nf, vrid) = {
   assert('q * 'm > 0);
   let LMUL_reg : int = if LMUL_pow <= 0 then 1 else int_power(2, LMUL_pow);
