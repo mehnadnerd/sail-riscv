@@ -288,7 +288,7 @@ char *process_args(int argc, char **argv)
       break;
     case 'W':
       fprintf(stderr, "disabling RVV vector instructions.\n");
-      rv_enable_rvv = false;
+      rv_enable_vext = false;
       break;
     case 'i':
       fprintf(stderr, "enabling storing illegal instruction bits in mtval.\n");

@@ -106,6 +106,16 @@ mapping vreg_name = {
     0b11111 <-> "v31"
 }
 
+function dirty_v_context() -> unit = {
+  assert(sys_enable_vext());
+  mstatus->VS() = extStatus_to_bits(Dirty);
+  mstatus->SD() = 0b1
+}
+
+function dirty_v_context_if_present() -> unit = {
+  if sys_enable_vext() then dirty_v_context()
+}
+
 val rV : forall 'n, 0 <= 'n < 32. regno('n) -> vregtype effect {rreg, escape}
 function rV r = {
   let zero_vreg : vregtype = zeros();
@@ -187,6 +197,8 @@ function wV (r, in_v) = {
     _ => assert(false, "invalid vector register number")
   };
 
+  dirty_v_context();
+
   let VLEN = unsigned(vlenb) * 8;
   assert(0 < VLEN & VLEN <= sizeof(vlenmax));
   if   get_config_print_reg()
@@ -249,6 +261,7 @@ val ext_write_vcsr : (bits(2), bits(1)) -> unit effect {rreg, wreg}
 function ext_write_vcsr (vxrm_val, vxsat_val) = {
   vcsr->vxrm()  = vxrm_val; /* Note: frm can be an illegal value, 101, 110, 111 */
   vcsr->vxsat() = vxsat_val;
+  dirty_v_context_if_present()
 }
 
 /* num_elem means max(VLMAX,VLEN/SEW)) according to Section 5.4 of RVV spec */

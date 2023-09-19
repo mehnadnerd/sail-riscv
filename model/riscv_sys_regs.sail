@@ -150,7 +150,8 @@ val sys_enable_fdext = {c: "sys_enable_fdext", ocaml: "Platform.enable_fdext", _
 val sys_enable_zfinx = {c: "sys_enable_zfinx", ocaml: "Platform.enable_zfinx", _: "sys_enable_zfinx"} : unit -> bool
 /* whether the N extension was enabled at boot */
 val sys_enable_next = {c: "sys_enable_next", ocaml: "Platform.enable_next", _: "sys_enable_next"} : unit -> bool
-val sys_enable_rvv = {c: "sys_enable_rvv", ocaml: "Platform.enable_rvv", _: "sys_enable_rvv"} : unit -> bool
+/* whether misa.v was enabled at boot */
+val sys_enable_vext = {c: "sys_enable_vext", ocaml: "Platform.enable_vext", _: "sys_enable_vext"} : unit -> bool
 
 /* This function allows an extension to veto a write to Misa
    if it would violate an alignment restriction on
@@ -210,7 +211,6 @@ function haveZkne()   -> bool = true
 function haveZknd()   -> bool = true
 
 function haveZmmul()  -> bool = true
-function haveRVV()    -> bool = misa.V() == 0b1
 
 /* Zicond extension support */
 function haveZicond() -> bool = true
@@ -246,6 +246,7 @@ bitfield Mstatus : xlenbits = {
   FS   : 14 .. 13,
 
   MPP  : 12 .. 11,
+  VS   : 10 .. 9,
   SPP  : 8,
 
   MPIE : 7,
@@ -299,7 +300,7 @@ function legalize_mstatus(o : Mstatus, v : xlenbits) -> Mstatus = {
    * that does not have a matching bitfield entry. All bits above 32 are handled
    * explicitly later.
    */
-  let m : Mstatus = Mk_Mstatus(zero_extend(v[22 .. 11] @ 0b00 @ v[8 .. 7] @ 0b0 @ v[5 .. 3] @ 0b0 @ v[1 .. 0]));
+  let m : Mstatus = Mk_Mstatus(zero_extend(v[22 .. 7] @ 0b0 @ v[5 .. 3] @ 0b0 @ v[1 .. 0]));
 
   /* We don't have any extension context yet. */
   let m = update_XS(m, extStatus_to_bits(Off));
@@ -310,7 +311,8 @@ function legalize_mstatus(o : Mstatus, v : xlenbits) -> Mstatus = {
    * FIXME: This should be made a platform parameter.
    */
   let m = if sys_enable_zfinx() then update_FS(m, extStatus_to_bits(Off)) else m;
-  let dirty = extStatus_of_bits(m.FS()) == Dirty | extStatus_of_bits(m.XS()) == Dirty;
+  let dirty = extStatus_of_bits(m.FS()) == Dirty | extStatus_of_bits(m.XS()) == Dirty |
+              extStatus_of_bits(m.VS()) == Dirty;
   let m = update_SD(m, bool_to_bits(dirty));
 
   /* We don't support dynamic changes to SXL and UXL. */
@@ -359,6 +361,8 @@ function haveFExt()    -> bool = (misa.F() == 0b1) & (mstatus.FS() != 0b00)
 function haveDExt()    -> bool = (misa.D() == 0b1) & (mstatus.FS() != 0b00)
 /* Zfh (half-precision) extension depends on misa.F and mstatus.FS */
 function haveZfh()     -> bool = (misa.F() == 0b1) & (mstatus.FS() != 0b00)
+/* V extension has to enable both via misa.V as well as mstatus.VS */
+function haveVExt()    -> bool = (misa.V() == 0b1) & (mstatus.VS() != 0b00)
 
 /* Zhinx, Zfinx and Zdinx extensions (TODO: gate FCSR access on [mhs]stateen0 bit 1 when implemented) */
 function haveZhinx()   -> bool = sys_enable_zfinx()
@@ -594,6 +598,7 @@ bitfield Sstatus : xlenbits = {
   SUM  : 18,
   XS   : 16 .. 15,
   FS   : 14 .. 13,
+  VS   : 10 .. 9,
   SPP  : 8,
   SPIE : 5,
   UPIE : 4,
@@ -621,6 +626,7 @@ function lower_mstatus(m : Mstatus) -> Sstatus = {
   let s = update_SUM(s, m.SUM());
   let s = update_XS(s, m.XS());
   let s = update_FS(s, m.FS());
+  let s = update_VS(s, m.VS());
   let s = update_SPP(s, m.SPP());
   let s = update_SPIE(s, m.SPIE());
   let s = update_UPIE(s, m.UPIE());
@@ -636,7 +642,9 @@ function lift_sstatus(m : Mstatus, s : Sstatus) -> Mstatus = {
   let m = update_XS(m, s.XS());
   // See comment for mstatus.FS.
   let m = update_FS(m, s.FS());
-  let dirty = extStatus_of_bits(m.FS()) == Dirty | extStatus_of_bits(m.XS()) == Dirty;
+  let m = update_VS(m, s.VS());
+  let dirty = extStatus_of_bits(m.FS()) == Dirty | extStatus_of_bits(m.XS()) == Dirty |
+              extStatus_of_bits(m.VS()) == Dirty;
   let m = update_SD(m, bool_to_bits(dirty));
 
   let m = update_SPP(m, s.SPP());
